@@ -1,0 +1,88 @@
+[Mesh]
+  type = GeneratedMesh
+  dim = 2
+  nx = 20
+  ny = 20
+  xmin = 0.0
+  xmax = 10.0
+  ymin = 0.0
+  ymax = 10.0
+[]
+
+[GlobalParams]
+  displacements = 'disp_x disp_y'
+[]
+
+[Variables] #Block for the main variable (displacement), for auxiliary variables using [AxuVariables]
+  [disp_x] # Define the interpolation functions
+    order = FIRST
+    family = LAGRANGE
+  []
+  [disp_y] # Define the interpolation functions
+    order = FIRST
+    family = LAGRANGE
+  []
+[]
+
+[Physics]
+  [SolidMechanics]
+    [QuasiStatic]
+      [all]
+        add_variables = true # add displacement variables
+        new_system = False
+        strain = SMALL
+        generate_output = 'max_principal_stress min_principal_stress stress_xx stress_xy stress_xz stress_yy stress_yz stress_zz'
+      []
+    []
+  []
+[]
+
+[BCs]
+  [top_stress]
+    type = NeumannBC
+    variable = disp_y
+    boundary = 'top'
+    value = 2e2 # pa
+  []
+  [bottom_stress]
+    type = NeumannBC
+    variable = disp_y
+    boundary = 'bottom'
+    value = 2e2 # pa
+  []
+  [left_stress]
+    type = NeumannBC
+    variable = disp_x
+    boundary = 'left'
+    value = 1.2e2 # pa
+  []
+  [right_stress]
+    type = NeumannBC
+    variable = disp_x
+    boundary = 'right'
+    value = 1.2e2 # pa
+  []
+[]
+
+[Materials]
+  [elasticity_tensor]
+    type = ComputeIsotropicElasticityTensor
+    youngs_modulus = 3e4 # Pa, the youngs_modulus of soil
+    poissons_ratio = 0.1
+  []
+
+  [linear_stress]
+    type = ComputeLinearElasticStress
+  []
+[]
+
+[Executioner]
+  type = Steady # means time-dependent
+  # dt = 0.1
+  # end_time = 100
+  solve_type = PJFNK
+[]
+
+[Outputs]
+  exodus = true
+[]
